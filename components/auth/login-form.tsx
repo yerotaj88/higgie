@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, type FormEvent } from "react"
-import { ArrowLeft, Loader2, MailCheck } from "lucide-react"
+import { ArrowLeft, Loader2, LogIn, MailCheck } from "lucide-react"
 
 import { requestMagicLinkAction } from "@/app/actions/auth"
 import { BRAND } from "@/lib/brand"
@@ -26,6 +26,8 @@ export function LoginForm({
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sentTo, setSentTo] = useState<string | null>(null)
+  // Local dev server without an email provider: the link is offered here.
+  const [devUrl, setDevUrl] = useState<string | null>(null)
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -38,8 +40,10 @@ export function LoginForm({
     setError(null)
     const result = await requestMagicLinkAction({ email, callbackUrl })
     setPending(false)
-    if (result.ok) setSentTo(result.data.email)
-    else setError(result.error)
+    if (result.ok) {
+      setSentTo(result.data.email)
+      setDevUrl(result.data.devUrl ?? null)
+    } else setError(result.error)
   }
 
   if (sentTo)
@@ -56,11 +60,26 @@ export function LoginForm({
           <span className="text-foreground">{sentTo}</span>. It expires in an
           hour. You can close this window — the link brings you right back.
         </p>
+        {devUrl ? (
+          <div className="flex w-full flex-col gap-3 rounded-2xl bg-surface p-4 text-sm text-muted-foreground">
+            <p>
+              Email isn&apos;t set up on this local server, so your sign-in link
+              is here instead.
+            </p>
+            <a
+              href={devUrl}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white/10 px-5 font-medium text-foreground transition-colors hover:bg-white/15"
+            >
+              <LogIn className="size-4" aria-hidden /> Open sign-in link
+            </a>
+          </div>
+        ) : null}
         <button
           type="button"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
           onClick={() => {
             setSentTo(null)
+            setDevUrl(null)
             setEmail("")
           }}
         >

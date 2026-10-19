@@ -38,6 +38,24 @@ test("sign up by magic link from the auth modal and receive the bonus", async ({
   ).toBeVisible()
 })
 
+test("without an email provider, the dev server offers the sign-in link on the page", async ({
+  page,
+}) => {
+  const email = uniqueEmail("devlink")
+  await page.goto("/image")
+  await dismissCookies(page)
+  await page.getByRole("button", { name: "Sign up" }).first().click()
+  const dialog = page.getByRole("dialog", { name: "Sign up" })
+  await dialog.getByPlaceholder("you@example.com").fill(email)
+  await dialog.getByRole("checkbox", { name: /agree/ }).check()
+  await dialog.getByRole("button", { name: "Continue with email" }).click()
+  await dialog.getByRole("link", { name: "Open sign-in link" }).click()
+  await expect(page).toHaveURL(/\/image/)
+  await expect(
+    page.getByRole("link", { name: /credits — account/ })
+  ).toBeVisible()
+})
+
 test("protected pages redirect signed-out visitors to /login", async ({
   page,
 }) => {

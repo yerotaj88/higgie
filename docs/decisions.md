@@ -78,7 +78,11 @@ Newest decisions go at the bottom of each section.
   filesystem driver under `.data/media` served by `/api/media/[...key]`
   (development only; production boot fails without R2 env).
 - **Email in dev:** without `AUTH_RESEND_KEY` in development, magic links are
-  printed to the server log. Production boot fails without it.
+  printed to the server log, and `requestMagicLinkAction` returns the link
+  (`devSignInLink`) so the login form shows an "Open sign-in link" button.
+  Never with a Resend key or outside `NODE_ENV=development`; bind the dev
+  server to `127.0.0.1` when others can reach it. Production boot fails
+  without the key.
 - **Env validation:** `lib/env.ts` (zod) validates at boot; production requires
   every service key, development allows the documented fallbacks and prints
   one warning line per fallback.

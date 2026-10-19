@@ -64,6 +64,25 @@ export async function sendEmail(input: {
   )
 }
 
+/**
+ * The latest magic link for an address, only on a development server with no
+ * email provider (the link would otherwise exist only in the server log), so
+ * the "check your email" step can offer it on the page.
+ */
+export async function devSignInLink(
+  email: string
+): Promise<string | undefined> {
+  const value = env()
+  if (value.NODE_ENV !== "development" || value.AUTH_RESEND_KEY)
+    return undefined
+  const { devMailbox } = await collections()
+  const mail = await devMailbox.findOne(
+    { to: email.toLowerCase() },
+    { sort: { createdAt: -1 } }
+  )
+  return mail?.url
+}
+
 async function storeDevMail(
   to: string,
   subject: string,

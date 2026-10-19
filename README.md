@@ -47,8 +47,11 @@ For offline development set in `.env.local`:
 `MONGODB_URI=mongodb://127.0.0.1:27027/?replicaSet=vireo`,
 `HF_API_BASE_URL=http://localhost:4010`, `HF_CREDENTIALS=mock:mock`,
 `SIGNUP_BONUS_CREDITS=200`, `E2E_TEST_MODE=true`. Magic links are printed to the
-dev-server log (no Resend key needed); media is stored under `.data/media`; the
+dev-server log and offered as an "Open sign-in link" button on the "Check your
+email" step (no Resend key needed); media is stored under `.data/media`; the
 reconciler runs in-process every 5 s because there is no cron or webhook tunnel.
+That button signs anyone in as any address, so when other machines can reach
+port 3000, run `pnpm dev --hostname 127.0.0.1`.
 
 ## Real services
 

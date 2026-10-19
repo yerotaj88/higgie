@@ -7,7 +7,7 @@ import { signIn, signOut } from "@/auth"
 import { runAction, UserFacingError } from "@/lib/action-result"
 import type { ActionResult } from "@/lib/action-types"
 import { isDisposableEmail, normalizeEmail } from "@/lib/auth/disposable"
-import { isE2eAddress } from "@/lib/email/send"
+import { devSignInLink, isE2eAddress } from "@/lib/email/send"
 import { env } from "@/lib/env"
 import { LIMITS, rateLimit } from "@/lib/rate-limit"
 
@@ -25,7 +25,7 @@ function safeCallback(value: string | undefined): string {
 export async function requestMagicLinkAction(input: {
   email: string
   callbackUrl?: string
-}): Promise<ActionResult<{ email: string }>> {
+}): Promise<ActionResult<{ email: string; devUrl?: string }>> {
   return runAction(async () => {
     const parsed = schema.parse(input)
     const email = normalizeEmail(parsed.email)
@@ -71,7 +71,8 @@ export async function requestMagicLinkAction(input: {
         "We couldn't send the sign-in email. Try again in a moment.",
         "EMAIL_FAILED"
       )
-    return { email }
+    const devUrl = await devSignInLink(email)
+    return devUrl ? { email, devUrl } : { email }
   })
 }
 
